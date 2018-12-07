@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Uploader</title>
+</head>
+<body>
+<div class="js-uploader uploader"></div>
+<script type="module">
+  import { Uploader } from './src/Uploader.js'
+
+  new Uploader({
+    el: document.querySelector('.js-uploader'),
+    conf: {
+      endPoint: '/',
+      filesLimit: 1,
+      fileMaxSize: 2, // M
+      acceptExt: ['image/jpeg', 'image/png']
+    },
+    data: {}
+  })
+</script>
+</body>
+</html>
