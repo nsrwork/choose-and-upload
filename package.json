@@ -1,0 +1,29 @@
+{
+  "name": "simple-ploader",
+  "version": "0.0.1",
+  "description": "Simple Uploader",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-preset-es2015": "^6.24.1",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0"
+  },
+  "scripts": {
+    "test": "mocha --require babel-core/register \"test/**/*.js\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nsrwork/uploader.git"
+  },
+  "author": "nsrwork",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nsrwork/uploader/issues"
+  },
+  "homepage": "https://github.com/nsrwork/uploader#readme"
+}

@@ -1,10 +1,17 @@
-import { HttpService } from './HttpService.js'
 import { Form } from './Form.js'
 import { Validate } from './Validate.js'
-import { getFormData } from './helpers.js'
+import { Thumb } from './Thumb.js'
 
 export class Uploader {
-  constructor ({ el, conf = { endPoint, filesLimit, fileMaxSize, acceptExt }, data }) {
+  constructor ({
+                 el, conf = {
+      endPoint,
+      filesLimit,
+      fileMaxSize,
+      acceptExt,
+      thumbsPool,
+    }, data,
+               }) {
     this.el = el
 
     this.acceptExt = conf.acceptExt || ['image/jpeg', 'image/png', 'image/gif']
@@ -12,6 +19,7 @@ export class Uploader {
     this.fileMaxSize = conf.fileMaxSize || 5 * 1024 * 1024
     this.endPoint = conf.endPoint || '/'
     this.data = data || {}
+    this.thumbsPool = conf.thumbsPool || '.js-thumbs-pool'
 
     this.form = new Form({
       el: document.createElement('div'),
@@ -24,7 +32,9 @@ export class Uploader {
     this.validator.setAcceptExt(this.acceptExt)
     this.validator.setFileMaxSize(this.fileMaxSize)
 
-    this.httpService = new HttpService(this.endPoint)
+    this.thumb = new Thumb({
+      el: document.querySelector(this.thumbsPool),
+    })
 
     this.el.append(this.form.el)
     this.render()
@@ -37,25 +47,49 @@ export class Uploader {
   _onFormSubmit ({ files }) {
 
     if (files.length > this.filesLimit) {
-      throw new Error('Количество файлов превышает разрешеный лимит.')
+      alert(
+        'Вы выбрали слишком много файлов, попробуйте еще раз, но не более: ' +
+        this.filesLimit)
+      return
     }
 
     for (let file of files) {
 
-      // @todo отрисовка болванки
+      // отрисовка болванки
+      this.thumb.addLoader()
 
       try {
         this.validator.validation(file)
       } catch (e) {
+        console.log(e)
         // @todo вывести сообщение об ошибке в болванку
-        console.log(e.message)
+        this.thumb.setSrc('error.png')
+        this.thumb.addError()
         continue
       }
 
-      let data = getFormData(files, this.data)
-      this.httpService.makeRequest(data)
+      let formData = new FormData()
+      formData.append('file', file, file.name)
+      formData.append('data', JSON.stringify(this.data))
 
-      // @todo вывести изображение в болванку
+      fetch(this.endPoint, {
+        method: 'POST',
+        body: formData,
+      }).
+        then(response => response.json()).
+        then((resolve) => {
+          console.log(resolve.data.img_path.md)
+          // вывести изображение в болванку
+          this.thumb.setSrc(resolve.data.img_path.md)
+          this.thumb.setHref(resolve.data.img_url)
+          this.thumb.addThumb()
+        }).
+        catch((e) => {
+          console.log(e)
+          // @todo вывести сообщение об ошибке в болванку
+          this.thumb.setSrc('error.png')
+          this.thumb.addError()
+        })
 
     }
 

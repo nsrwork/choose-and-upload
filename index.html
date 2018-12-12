@@ -6,6 +6,7 @@
 </head>
 <body>
 <div class="js-uploader uploader"></div>
+<div class="js-thumbs-pool"></div>
 <script type="module">
   import { Uploader } from './src/Uploader.js'
 
@@ -13,7 +14,7 @@
     el: document.querySelector('.js-uploader'),
     conf: {
       endPoint: '/',
-      filesLimit: 1,
+      filesLimit: 10,
       fileMaxSize: 2, // M
       acceptExt: ['image/jpeg', 'image/png']
     },
