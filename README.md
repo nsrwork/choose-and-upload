@@ -1,2 +1,2 @@
-# uploader
-Ajax Uploader ES6
+# Uploader
+Простой Ajax загрузчик
