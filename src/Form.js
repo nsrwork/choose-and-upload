@@ -22,7 +22,7 @@ export class Form {
   render () {
     this.el.innerHTML = `
       <input 
-        style="display:none" 
+        style="visibility: hidden; position: absolute; top: 0px; left: 0px; height: 0px; width: 0px;" 
         type="file" 
         name="files[]" 
         id="uploadFile" 
@@ -35,8 +35,6 @@ export class Form {
 
   _onSubmit (event) {
     event.preventDefault()
-    this.onSubmit({
-      files: event.target.files,
-    })
+    this.onSubmit(event.target.files)
   }
 }
