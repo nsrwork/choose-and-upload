@@ -5,18 +5,21 @@
     <title>Uploader</title>
 </head>
 <body>
+<div class="js-pool-errors pool-errors"></div>
 <div class="js-uploader uploader"></div>
-<div class="js-thumbs-pool"></div>
+<div class="js-pool-thumbs pool-thumbs"></div>
 <script type="module">
   import { Uploader } from './src/Uploader.js'
 
   new Uploader({
-    el: document.querySelector('.js-uploader'),
+    el: '.js-uploader',
     conf: {
       endPoint: '/',
-      filesLimit: 10,
-      fileMaxSize: 2, // M
-      acceptExt: ['image/jpeg', 'image/png']
+      filesLimit: 5,
+      fileMaxSize: 1, // M
+      acceptExt: ['image/jpeg', 'image/png'],
+      thumbsPool: '.js-pool-thumbs',
+      errorsPool: '.js-pool-errors'
     },
     data: {}
   })
