@@ -1,12 +1,12 @@
 export class Validate {
   constructor () {}
 
-  setAcceptExt (array) {
-    this.acceptExt = array
+  setAcceptExt (extentions) {
+    this.acceptExt = extentions
   }
 
-  setFileMaxSize (size) {
-    this.fileMaxSize = size * 1024 * 1024
+  setFileMaxSize (sizeAsMb) {
+    this.fileMaxSize = sizeAsMb * 1024 * 1024
   }
 
   validation (fileWrap = {status, message, file: {}}) {
@@ -16,13 +16,11 @@ export class Validate {
     }
 
     if (!this.acceptExt.includes(fileWrap.file.type)) {
-      fileWrap.status = 'ERROR'
-      fileWrap.message = 'Формат файла "' + fileWrap.file.name + '" отличается от разрешенных: ' + String(this.acceptExt)
+      throw new Error( 'Формат файла "' + fileWrap.file.name + '" отличается от разрешенных: ' + String(this.acceptExt))
     }
 
     if (fileWrap.file.size > this.fileMaxSize) {
-      fileWrap.status = 'ERROR'
-      fileWrap.message = 'Размер файла "' + fileWrap.file.name + '" превышает разрешенный лимит в ' + (this.fileMaxSize / 1024 / 1024) + 'Мб.'
+      throw new TypeError( 'Размер файла "' + fileWrap.file.name + '" превышает разрешенный лимит в ' + (this.fileMaxSize / 1024 / 1024) + 'Мб.')
     }
 
   }

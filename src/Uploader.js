@@ -73,7 +73,11 @@ export class Uploader {
 
       try {
         this.validator.validation(fileWrap)
-      } catch (e) { console.log(e) }
+      } catch (e) {
+        console.log(e)
+        fileWrap.status = 'ERROR'
+        fileWrap.message = e.message
+      }
 
     }
 
@@ -116,7 +120,6 @@ export class Uploader {
             img_url: '' // url to img
           }
            */
-          // вывести изображение в болванку
           this.thumb.setSrc(resolve.data.img_path.md)
           this.thumb.setHref(resolve.data.img_url)
           this.thumb.addThumb()
