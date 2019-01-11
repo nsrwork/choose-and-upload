@@ -1,7 +1,7 @@
 {
-  "name": "simple-ploader",
+  "name": "pool-uploader",
   "version": "0.0.3",
-  "description": "Simple Uploader",
+  "description": "Pool Uploader",
   "main": "index.js",
   "directories": {
     "test": "test"
