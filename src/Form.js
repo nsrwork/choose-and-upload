@@ -4,7 +4,7 @@ export class Form {
     this.multiple = false
 
     this.el.addEventListener('click', () => {
-      document.querySelector('#uploadFile').click()
+      document.querySelector('.js-pool-loader').click()
     })
 
     this.el.addEventListener('change', this._onSubmit.bind(this))
@@ -25,11 +25,11 @@ export class Form {
         style="visibility: hidden; position: absolute; top: 0px; left: 0px; height: 0px; width: 0px;" 
         type="file" 
         name="files[]" 
-        id="uploadFile" 
+        class="js-pool-loader"
         accept="${this.accept}"
         ${this.multiple}
       >
-      <button name="uploadButton" class="uploadButton">+</button>      
+      <button type="button" name="poolBtn" class="js-pool-btn">+ Выберите фото для загрузки</button>      
     `
   }
 

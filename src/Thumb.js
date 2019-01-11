@@ -1,9 +1,16 @@
 export class Thumb {
-  constructor ({ el }) {
+  constructor ({ el, previewTemplate, loaderTemplate, failTemplate }) {
     this.el = el
-    this.thumbItem = document.createElement('div')
-    this.src = 'loader.gif'
-    this.href = ''
+    this.src = ''
+    this.href = '#'
+    this.rank = 0
+    this.previewTemplate = previewTemplate
+    this.loaderTemplate = loaderTemplate
+    this.failTemplate = failTemplate
+  }
+
+  setRank (rank) {
+    this.rank = rank
   }
 
   setHref (href) {
@@ -14,34 +21,35 @@ export class Thumb {
     this.src = src
   }
 
+  addPreview () {
+    let template = document.createElement('div')
+    template.innerHTML = this.previewTemplate
+
+    if (template.querySelector('.js-pool-preview__link')) {
+      template.querySelector('.js-pool-preview__link').setAttribute('href', this.href)
+    }
+
+    if (template.querySelector('.js-pool-preview__rank')) {
+      template.querySelector('.js-pool-preview__rank').innerText = this.rank
+    }
+
+    if (template.querySelector('.js-pool-preview__img')) {
+      template.querySelector('.js-pool-preview__img').setAttribute('src', this.src)
+    }
+
+    this.el.querySelector('.js-pool-loader').remove()
+    this.el.append(template.firstElementChild)
+  }
+
   addLoader () {
-    this.thumbItem.innerHTML = `
-    <div class="item item_loader">
-        <img src="${this.src}" alt="">
-    </div>
-    `
-    this.el.append(this.thumbItem.firstElementChild)
+    let template = document.createElement('div')
+    template.innerHTML = this.loaderTemplate
+    this.el.append(template.firstElementChild)
   }
 
-  addThumb () {
-    this.thumbItem.innerHTML = `
-    <div class="item">
-        <a href="${this.href}">
-            <img src="${this.src}" alt="">
-        </a>
-    </div>
-    `
-    this.el.querySelector('.item_loader').remove()
-    this.el.append(this.thumbItem.firstElementChild)
-  }
-
-  addError () {
-    this.thumbItem.innerHTML = `
-    <div class="item">
-        <img src="${this.src}" alt="">
-    </div>
-    `
-    this.el.querySelector('.item_loader').remove()
-    this.el.append(this.thumbItem.firstElementChild)
+  addFail () {
+    let template = document.createElement('div')
+    template.innerHTML = this.failTemplate
+    this.el.append(template.firstElementChild)
   }
 }
