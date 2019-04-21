@@ -1,29 +1,22 @@
 {
-  "name": "pool-uploader",
-  "version": "0.0.3",
-  "description": "Pool Uploader",
+  "name": "choose-and-send",
+  "version": "0.1.0",
+  "description": "Photo Uploader",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "dependencies": {},
-  "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-preset-es2015": "^6.24.1",
-    "chai": "^4.2.0",
-    "mocha": "^5.2.0"
-  },
-  "scripts": {
-    "test": "mocha --require babel-core/register \"test/**/*.js\""
-  },
+  "devDependencies": {},
+  "scripts": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nsrwork/uploader.git"
+    "url": "git+https://github.com/nsrwork/choose-and-upload"
   },
   "author": "nsrwork",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/nsrwork/uploader/issues"
+    "url": "https://github.com/nsrwork/choose-and-upload/issues"
   },
-  "homepage": "https://github.com/nsrwork/uploader#readme"
+  "homepage": "https://github.com/nsrwork/choose-and-upload#readme"
 }
