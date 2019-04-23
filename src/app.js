@@ -314,6 +314,10 @@ export class App {
     this.button = new ButtonComponent({ el: this.el })
     this.button.render()
 
+    // инициализируем болванку
+    this.thumb = new ThumbComponent({ el: this.el })
+    this.thumb.init()
+
     // настраиваем и отрисовываем скрытую форму
     this.form = new FormComponent({ el: this.el })
     this.form.filesAccept = this.conf.filesAccept
@@ -330,13 +334,6 @@ export class App {
     this.http = new HttpService({ el: this.el })
     this.http.endpoint = this.conf.endPoint
     this.http.method = this.conf.methodRequest
-
-    // инициализируем объект сообщений
-    this.alert = new AlertComponent({ el: this.el })
-
-    // инициализируем болванку
-    this.thumb = new ThumbComponent({ el: this.el })
-    this.thumb.init()
 
     this.el.addEventListener('click', this.onClick.bind(this))
     this.el.addEventListener('change', this.onChange.bind(this))
