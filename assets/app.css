@@ -1,0 +1,20 @@
+#ChooseAndUpload {
+    margin: 20px
+}
+
+#ChooseAndUpload .card-deck {
+    margin: 20px 0;
+}
+
+#ChooseAndUpload .card-deck .card {
+    width: 18rem;
+}
+
+#ChooseAndUpload .card-deck .card img {
+    width: 150px;
+    height: 150px;
+}
+
+#ChooseAndUpload .choose-and-upload__button {
+
+}
