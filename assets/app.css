@@ -1,20 +1,57 @@
+:root {
+    --card_height: 150px;
+    --card_width: 150px;
+    --card_bg-default: #f8f9fa;
+    --card_error-icon-color: #dc3545;
+    --button_bg-color: #007bff;
+    --button_border-color: #007bff;
+    --button_text-color: #fff;
+}
+
 #ChooseAndUpload {
     margin: 20px
 }
 
-#ChooseAndUpload .card-deck {
+#ChooseAndUpload .choose-and-upload-alerts__group {
     margin: 20px 0;
 }
 
-#ChooseAndUpload .card-deck .card {
-    width: 18rem;
+#ChooseAndUpload .choose-and-upload-alerts__alert {}
+
+#ChooseAndUpload .choose-and-upload-button__group {
+    margin: 20px 0;
 }
 
-#ChooseAndUpload .card-deck .card img {
-    width: 150px;
-    height: 150px;
+#ChooseAndUpload .choose-and-upload-button__button {
+    color: var(--button_text-color);
+    background-color: var(--button_bg-color);
+    border-color: var(--button_border-color);
 }
 
-#ChooseAndUpload .choose-and-upload__button {
+#ChooseAndUpload .choose-and-upload-card__deck {
+    display: flex;
+    margin: 20px 0;
+}
 
+#ChooseAndUpload .choose-and-upload-card__card {
+    height: var(--card_height);
+    width: var(--card_width);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--card_bg-default);
+    margin-bottom: 1rem;
+    margin-right: 1rem;
+}
+
+#ChooseAndUpload .choose-and-upload-card__card span {
+    font-size: 48px;
+    color: var(--card_error-icon-color)
+}
+
+#ChooseAndUpload .choose-and-upload-card__card-img {
+    overflow: hidden;
+    max-height: var(--card_height);
+    max-width: var(--card_width);
 }
