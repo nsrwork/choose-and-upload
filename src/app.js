@@ -7,10 +7,10 @@ const BUTTON_STATE_READY = BUTTON + '-state-ready'
 const BUTTON_STATE_LOADING = BUTTON + '-state-loading'
 const BUTTON_STATE_ERROR = BUTTON + '-state-error'
 
-const THUMB = APPLICATION + '-thumb'
-const THUMB_STATE_LOADING = THUMB + '-state-loading'
-const THUMB_STATE_SUCCESS = THUMB + '-state-success'
-const THUMB_STATE_ERROR = THUMB + '-state-error'
+const CARD = APPLICATION + '-card'
+const CARD_STATE_LOADING = CARD + '-state-loading'
+const CARD_STATE_SUCCESS = CARD + '-state-success'
+const CARD_STATE_ERROR = CARD + '-state-error'
 
 const EVENT = APPLICATION + '-event'
 const EVENT_START = EVENT + '-start'
@@ -104,8 +104,8 @@ class ButtonComponent {
 
   template () {
     return `
-        <div class="choose-and-upload__button">
-            <button type="button" class="btn btn-primary ${BUTTON}"></button>
+        <div class="${BUTTON}__group">
+            <button type="button" class="btn btn-primary ${BUTTON}__button"></button>
         </div>
         `
   }
@@ -157,47 +157,46 @@ class AlertComponent {
 
   template () {
     return `
-      <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-    `
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        `
   }
 }
 
-class ThumbComponent {
+class CardComponent {
   constructor ({ el }) {
     this.el = el
     this.el.addEventListener(EVENT_START, () => this.loading())
-    this.el.addEventListener(EVENT_VALIDATION_FAIL, () => this.state = THUMB_STATE_ERROR)
-    this.el.addEventListener(EVENT_LOAD_SUCCESS, () => this.state = THUMB_STATE_SUCCESS)
-    this.el.addEventListener(EVENT_LOAD_FAIL, () => this.state = THUMB_STATE_ERROR)
+    this.el.addEventListener(EVENT_VALIDATION_FAIL, () => this.state = CARD_STATE_ERROR)
+    this.el.addEventListener(EVENT_LOAD_SUCCESS, () => this.state = CARD_STATE_SUCCESS)
+    this.el.addEventListener(EVENT_LOAD_FAIL, () => this.state = CARD_STATE_ERROR)
   }
 
   init () {
-    this.el.append(HelperUtil.createHTML(`<div class="card-deck"></div>`))
-    this._deck = this.el.querySelector('.card-deck')
+    this.el.append(HelperUtil.createHTML(`<div class="${CARD}__deck"></div>`))
+    this._deck = this.el.querySelector(`.${CARD}__deck`)
   }
 
   loading () {
     this.state = BUTTON_STATE_LOADING
-
-    this._deck.append(HelperUtil.createHTML(`<div class="card border"></div>`))
-    this._thumb = this._deck.querySelector('.card:last-child')
+    this._deck.append(HelperUtil.createHTML(`<div class="${CARD}__card"></div>`))
+    this._card = this._deck.querySelector(`.${CARD}__card:last-child`)
   }
 
   set state (state) {
-    if (THUMB_STATE_LOADING === state) {
-      this._thumb.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`
+    if (CARD_STATE_LOADING === state) {
+      this._card.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`
     }
 
-    if (THUMB_STATE_ERROR === state) {
-      this._thumb.innerHTML = `<span aria-hidden="true">&times;</span>`
+    if (CARD_STATE_ERROR === state) {
+      this._card.innerHTML = `<span aria-hidden="true">&times;</span>`
     }
 
-    if (THUMB_STATE_SUCCESS === state) {
-      this._thumb.innerHTML = `<img src="https://via.placeholder.com/150" class="card-img-top" alt="...">`
+    if (CARD_STATE_SUCCESS === state) {
+      this._card.innerHTML = `<img src="https://placeimg.com/150/150/people" class="${CARD}__card-img" alt="">`
     }
   }
 }
@@ -227,7 +226,7 @@ class ValidationService {
     this._errors = []
 
     if (!file instanceof File) {
-      throw new TypeError('Не корретный тип.')
+      throw new TypeError('Не корректный тип.')
     }
 
     if (this._limit <= 0) {
@@ -315,8 +314,8 @@ export class App {
     this.button.render()
 
     // инициализируем болванку
-    this.thumb = new ThumbComponent({ el: this.el })
-    this.thumb.init()
+    this.card = new CardComponent({ el: this.el })
+    this.card.init()
 
     // настраиваем и отрисовываем скрытую форму
     this.form = new FormComponent({ el: this.el })
@@ -340,7 +339,7 @@ export class App {
   }
 
   onClick (event) {
-    if (event.target.classList.contains(BUTTON) && !this.button.isDisable()) {
+    if (event.target.classList.contains(`${BUTTON}__button`) && !this.button.isDisable()) {
       this.el.querySelector('input').click()
     }
   }
