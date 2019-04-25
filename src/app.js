@@ -13,7 +13,7 @@ const CARD_STATE_SUCCESS = CARD + '-state-success'
 const CARD_STATE_ERROR = CARD + '-state-error'
 
 const EVENT = APPLICATION + '-event'
-const EVENT_START = EVENT + '-start'
+const EVENT_VALIDATION_START = EVENT + '-start'
 const EVENT_VALIDATION_FAIL = EVENT + '-validation-fail'
 const EVENT_LOAD_FAIL = EVENT + '-load-fail'
 const EVENT_LOAD_SUCCESS = EVENT + '-load-success'
@@ -22,6 +22,18 @@ const defaultConf = {
 
   /**
    * FormComponent configuration
+   */
+
+  /**
+   * AlertComponent configuration
+   */
+
+  /**
+   * ButtonComponent configuration
+   */
+
+  /**
+   * CardComponent configuration
    */
 
   /**
@@ -35,11 +47,11 @@ const defaultConf = {
    * HttpService configuration
    */
   methodRequest: 'POST',
-  endPoint: '/',
-
+  endPoint: window.location.href,
+  headers: {}
 }
 
-class HelperUtil {
+export class HelperUtil {
 
   /**
    * @type {string}
@@ -52,12 +64,16 @@ class HelperUtil {
 
     return node.firstChild
   }
+
+  static getUniqId () {
+    return 'ID' + Math.random().toString(36).substr(2, 16)
+  }
 }
 
-class ButtonComponent {
+export class ButtonComponent {
   constructor ({ el }) {
     this.el = el
-    this.el.addEventListener(EVENT_START, () => this.loading())
+    this.el.addEventListener(EVENT_VALIDATION_START, () => this.loading())
     this.el.addEventListener(EVENT_LOAD_SUCCESS, () => this.ready())
     this.el.addEventListener(EVENT_LOAD_FAIL, () => this.error())
     this.el.addEventListener(EVENT_VALIDATION_FAIL, () => this.ready())
@@ -69,7 +85,7 @@ class ButtonComponent {
 
   render () {
     this.el.append(HelperUtil.createHTML(this.template()))
-    this._button = this.el.querySelector('button')
+    this._button = this.el.querySelector(`.${BUTTON}__button`)
     this.ready()
   }
 
@@ -105,13 +121,13 @@ class ButtonComponent {
   template () {
     return `
         <div class="${BUTTON}__group">
-            <button type="button" class="btn btn-primary ${BUTTON}__button"></button>
+            <button type="button" class="btn ${BUTTON}__button"></button>
         </div>
         `
   }
 }
 
-class FormComponent {
+export class FormComponent {
   constructor ({ el }) {
     this.el = el
   }
@@ -136,7 +152,7 @@ class FormComponent {
   }
 }
 
-class AlertComponent {
+export class AlertComponent {
   constructor ({ el }) {
     this.el = el
     this.el.addEventListener(EVENT_VALIDATION_FAIL, this)
@@ -144,35 +160,29 @@ class AlertComponent {
   }
 
   init () {
-    this.el.append(HelperUtil.createHTML(`<div class="${ALERT}"></div>`))
-    this._alerts = this.el.querySelector('.' + ALERT)
+    this.el.append(HelperUtil.createHTML(`<div class="${ALERT}__group"></div>`))
+    this._alerts = this.el.querySelector(`.${ALERT}__group`)
   }
 
   handleEvent (event) {
-    console.log(event)
     this._alerts.append(HelperUtil.createHTML(this.template()))
-    this._alert = this._alerts.querySelectorAll('.alert:last-child')
-    this._alert[0].append(event.detail)
+    this._alert = this._alerts.querySelectorAll(`.${ALERT}__alert:last-child`)
+    this._alert[0].append(event.detail.error)
   }
 
   template () {
-    return `
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        `
+    return `<div class="alert alert-warning alert-dismissible fade show ${ALERT}__alert" role="alert"></div>`
   }
 }
 
-class CardComponent {
+export class CardComponent {
   constructor ({ el }) {
     this.el = el
-    this.el.addEventListener(EVENT_START, () => this.loading())
-    this.el.addEventListener(EVENT_VALIDATION_FAIL, () => this.state = CARD_STATE_ERROR)
-    this.el.addEventListener(EVENT_LOAD_SUCCESS, () => this.state = CARD_STATE_SUCCESS)
-    this.el.addEventListener(EVENT_LOAD_FAIL, () => this.state = CARD_STATE_ERROR)
+    this.el.addEventListener(EVENT_VALIDATION_START, (event) => this.loading(event))
+    this.el.addEventListener(EVENT_VALIDATION_FAIL, (event) => this.error(event))
+    this.el.addEventListener(EVENT_LOAD_SUCCESS, (event) => this.success(event))
+    this.el.addEventListener(EVENT_LOAD_FAIL, (event) => this.error(event))
+    this.cardId = null
   }
 
   init () {
@@ -180,15 +190,27 @@ class CardComponent {
     this._deck = this.el.querySelector(`.${CARD}__deck`)
   }
 
-  loading () {
-    this.state = BUTTON_STATE_LOADING
-    this._deck.append(HelperUtil.createHTML(`<div class="${CARD}__card"></div>`))
-    this._card = this._deck.querySelector(`.${CARD}__card:last-child`)
+  error (event) {
+    this.cardId = event.detail.id
+    this.state = CARD_STATE_ERROR
+  }
+
+  success (event) {
+    this.cardId = event.detail.id
+    this.state = CARD_STATE_SUCCESS
+  }
+
+  loading (event) {
+    this.cardId = event.detail.id
+    this._deck.append(HelperUtil.createHTML(`<div id="${this.cardId}" class="${CARD}__card"></div>`))
+    this.state = CARD_STATE_LOADING
   }
 
   set state (state) {
+    this._card = this._deck.querySelector(`#${this.cardId}`)
+
     if (CARD_STATE_LOADING === state) {
-      this._card.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`
+      this._card.innerHTML = `<span class="spinner-grow text-primary" role="status"></span>`
     }
 
     if (CARD_STATE_ERROR === state) {
@@ -201,7 +223,7 @@ class CardComponent {
   }
 }
 
-class ValidationService {
+export class ValidationService {
   set filesAccept (extensions) {
     this._accept = extensions
   }
@@ -253,7 +275,7 @@ class ValidationService {
   }
 }
 
-class HttpService {
+export class HttpService {
   constructor ({ el }) {
     this.el = el
   }
@@ -266,29 +288,44 @@ class HttpService {
     this._method = method.toUpperCase()
   }
 
-  set data (data) {
-    this._data = data
-  }
-
-  send () {
-    this.doRequest().then((response) => {
-      if (response.ok) {
-        this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_SUCCESS, { detail: response.status }))
-      } else {
-        this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_FAIL, { detail: response.statusText }))
-      }
-    }).catch((response) => {
-      this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_FAIL, { detail: response }))
+  set headers (headers) {
+    this._headers = Object.assign(headers, {
+      'Content-Type': 'application/json;charset=utf-8;multipart/form-file',
     })
   }
 
-  async doRequest () {
+  send (file) {
+    this.doRequest(file).then((response) => {
+      if (response.ok) {
+        this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_SUCCESS, {
+          detail: {
+            response: response.status, // @todo
+            id: file.id
+          }
+        }))
+      } else {
+        this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_FAIL, {
+          detail: {
+            error: response.statusText, // @todo
+            id: file.id
+          }
+        }))
+      }
+    }).catch((response) => {
+      this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_FAIL, {
+        detail: {
+          error: response, // @todo
+          id: file.id
+        }
+      }))
+    })
+  }
+
+  async doRequest (file) {
     return await fetch(this._url, {
       method: this._method,
-      headers: {
-        'Content-Type': 'application/json;charset=utf-8;multipart/form-data',
-      },
-      body: JSON.stringify(this._data)
+      headers: this._headers,
+      body: JSON.stringify(file)
     })
   }
 }
@@ -333,6 +370,7 @@ export class App {
     this.http = new HttpService({ el: this.el })
     this.http.endpoint = this.conf.endPoint
     this.http.method = this.conf.methodRequest
+    this.http.headers = this.conf.headers
 
     this.el.addEventListener('click', this.onClick.bind(this))
     this.el.addEventListener('change', this.onChange.bind(this))
@@ -346,25 +384,29 @@ export class App {
 
   onChange (event) {
     if (event.target.files.length <= 0) {
-      this.el.dispatchEvent(new CustomEvent(EVENT_VALIDATION_FAIL, { detail: 'Не выбрано ни одного файла' }))
+      this.el.dispatchEvent(new CustomEvent(EVENT_VALIDATION_FAIL, { detail: { error: 'Не выбрано ни одного файла' } }))
       return
     }
 
     const collection = new Set(event.target.files)
 
-    this.el.dispatchEvent(new Event(EVENT_START))
-
     for (let file of collection.values()) {
 
+      file.id = HelperUtil.getUniqId()
+
+      this.el.dispatchEvent(new CustomEvent(EVENT_VALIDATION_START, { detail: { id: file.id } }))
+
       if (!this.validation.isValid(file)) {
-        this.el.dispatchEvent(new CustomEvent(EVENT_VALIDATION_FAIL, { detail: this.validation.errors[0] }))
+        this.el.dispatchEvent(new CustomEvent(EVENT_VALIDATION_FAIL, {
+          detail: {
+            id: file.id,
+            error: this.validation.errors[0]
+          }
+        }))
         continue
       }
 
-      this.http.data = file
-      this.http.send()
+      this.http.send(file)
     }
-
-    collection.clear()
   }
 }

@@ -30,6 +30,7 @@
 
 #ChooseAndUpload .choose-and-upload-card__deck {
     display: flex;
+    flex-wrap: wrap;
     margin: 20px 0;
 }
 
