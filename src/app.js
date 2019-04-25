@@ -17,6 +17,7 @@ const EVENT_VALIDATION_START = EVENT + '-start'
 const EVENT_VALIDATION_FAIL = EVENT + '-validation-fail'
 const EVENT_LOAD_FAIL = EVENT + '-load-fail'
 const EVENT_LOAD_SUCCESS = EVENT + '-load-success'
+const EVENT_LOAD_COMPLETE = EVENT + '-load-complete'
 
 const defaultConf = {
 
@@ -35,6 +36,12 @@ const defaultConf = {
   /**
    * CardComponent configuration
    */
+
+  /**
+   * ThumbService configuration
+   */
+  thumbHeight: 150,
+  thumbWidth: 150,
 
   /**
    * Validation configuration
@@ -73,10 +80,10 @@ export class HelperUtil {
 export class ButtonComponent {
   constructor ({ el }) {
     this.el = el
-    this.el.addEventListener(EVENT_VALIDATION_START, () => this.loading())
-    this.el.addEventListener(EVENT_LOAD_SUCCESS, () => this.ready())
-    this.el.addEventListener(EVENT_LOAD_FAIL, () => this.error())
-    this.el.addEventListener(EVENT_VALIDATION_FAIL, () => this.ready())
+    this.el.addEventListener(EVENT_VALIDATION_START, () => this.onLoading())
+    this.el.addEventListener(EVENT_LOAD_SUCCESS, () => this.onReady())
+    this.el.addEventListener(EVENT_LOAD_FAIL, () => this.onError())
+    this.el.addEventListener(EVENT_VALIDATION_FAIL, () => this.onReady())
   }
 
   isDisable () {
@@ -86,20 +93,20 @@ export class ButtonComponent {
   render () {
     this.el.append(HelperUtil.createHTML(this.template()))
     this._button = this.el.querySelector(`.${BUTTON}__button`)
-    this.ready()
+    this.onReady()
   }
 
-  ready () {
+  onReady () {
     this.state = BUTTON_STATE_READY
     this._button.disabled = false
   }
 
-  loading () {
+  onLoading () {
     this.state = BUTTON_STATE_LOADING
     this._button.disabled = true
   }
 
-  error () {
+  onError () {
     this.state = BUTTON_STATE_ERROR
     this._button.disabled = true
   }
@@ -165,9 +172,14 @@ export class AlertComponent {
   }
 
   handleEvent (event) {
+    // ошибки ответа сервера
+    if (event.detail.file.hasOwnProperty('response')) {
+      event.detail.file.error = event.detail.file.response.statusText
+    }
+
     this._alerts.append(HelperUtil.createHTML(this.template()))
     this._alert = this._alerts.querySelectorAll(`.${ALERT}__alert:last-child`)
-    this._alert[0].append(event.detail.error)
+    this._alert[0].append(event.detail.file.error)
   }
 
   template () {
@@ -178,11 +190,11 @@ export class AlertComponent {
 export class CardComponent {
   constructor ({ el }) {
     this.el = el
-    this.el.addEventListener(EVENT_VALIDATION_START, (event) => this.loading(event))
-    this.el.addEventListener(EVENT_VALIDATION_FAIL, (event) => this.error(event))
-    this.el.addEventListener(EVENT_LOAD_SUCCESS, (event) => this.success(event))
-    this.el.addEventListener(EVENT_LOAD_FAIL, (event) => this.error(event))
-    this.cardId = null
+    this.el.addEventListener(EVENT_VALIDATION_START, this.onLoading.bind(this))
+    this.el.addEventListener(EVENT_VALIDATION_FAIL, this.onError.bind(this))
+    this.el.addEventListener(EVENT_LOAD_COMPLETE, this.onSuccess.bind(this))
+    this.el.addEventListener(EVENT_LOAD_FAIL, this.onError.bind(this))
+    this._file = null
   }
 
   init () {
@@ -190,24 +202,24 @@ export class CardComponent {
     this._deck = this.el.querySelector(`.${CARD}__deck`)
   }
 
-  error (event) {
-    this.cardId = event.detail.id
+  onError (event) {
+    this._file = event.detail.file
     this.state = CARD_STATE_ERROR
   }
 
-  success (event) {
-    this.cardId = event.detail.id
+  onSuccess (event) {
+    this._file = event.detail.file
     this.state = CARD_STATE_SUCCESS
   }
 
-  loading (event) {
-    this.cardId = event.detail.id
-    this._deck.append(HelperUtil.createHTML(`<div id="${this.cardId}" class="${CARD}__card"></div>`))
+  onLoading (event) {
+    this._file = event.detail.file
+    this._deck.append(HelperUtil.createHTML(`<div id="${this._file.id}" class="${CARD}__card"></div>`))
     this.state = CARD_STATE_LOADING
   }
 
   set state (state) {
-    this._card = this._deck.querySelector(`#${this.cardId}`)
+    this._card = this._deck.querySelector(`#${this._file.id}`)
 
     if (CARD_STATE_LOADING === state) {
       this._card.innerHTML = `<span class="spinner-grow text-primary" role="status"></span>`
@@ -218,8 +230,29 @@ export class CardComponent {
     }
 
     if (CARD_STATE_SUCCESS === state) {
-      this._card.innerHTML = `<img src="https://placeimg.com/150/150/people" class="${CARD}__card-img" alt="">`
+      this._card.innerHTML = `<img src="${this._file.dataURL}" class="${CARD}__card-img" alt="">`
     }
+  }
+}
+
+export class ThumbService {
+  constructor ({ el }) {
+    this.el = el
+    this.reader = new FileReader()
+    this.reader.addEventListener('load', this.onLoad.bind(this))
+    this.el.addEventListener(EVENT_LOAD_SUCCESS, this.onSuccess.bind(this))
+    this._file = null
+  }
+
+  onSuccess (event) {
+    this._file = event.detail.file
+    this.reader.readAsDataURL(this._file)
+  }
+
+  onLoad (event) {
+    // @todo resize and crop
+    this._file.dataURL = event.target.result
+    this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_COMPLETE, { detail: { file: this._file } }))
   }
 }
 
@@ -296,28 +329,15 @@ export class HttpService {
 
   send (file) {
     this.doRequest(file).then((response) => {
+      file.response = response
       if (response.ok) {
-        this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_SUCCESS, {
-          detail: {
-            response: response.status, // @todo
-            id: file.id
-          }
-        }))
+        this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_SUCCESS, { detail: { file } }))
       } else {
-        this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_FAIL, {
-          detail: {
-            error: response.statusText, // @todo
-            id: file.id
-          }
-        }))
+        this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_FAIL, { detail: { file } }))
       }
     }).catch((response) => {
-      this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_FAIL, {
-        detail: {
-          error: response, // @todo
-          id: file.id
-        }
-      }))
+      file.error = response
+      this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_FAIL, { detail: { file } }))
     })
   }
 
@@ -354,6 +374,11 @@ export class App {
     this.card = new CardComponent({ el: this.el })
     this.card.init()
 
+    // инициализация сервиса превьюшек
+    this.thumb = new ThumbService({ el: this.el })
+    this.thumb.height = this.conf.thumbHeight
+    this.thumb.width = this.conf.thumbWidth
+
     // настраиваем и отрисовываем скрытую форму
     this.form = new FormComponent({ el: this.el })
     this.form.filesAccept = this.conf.filesAccept
@@ -366,7 +391,7 @@ export class App {
     this.validation.filesLimit = this.conf.filesLimit
     this.validation.fileMaxSize = this.conf.fileMaxSize
 
-    // настраиваем параметры http запроса
+    // настраиваем параметры http сервиса
     this.http = new HttpService({ el: this.el })
     this.http.endpoint = this.conf.endPoint
     this.http.method = this.conf.methodRequest
@@ -394,15 +419,11 @@ export class App {
 
       file.id = HelperUtil.getUniqId()
 
-      this.el.dispatchEvent(new CustomEvent(EVENT_VALIDATION_START, { detail: { id: file.id } }))
+      this.el.dispatchEvent(new CustomEvent(EVENT_VALIDATION_START, { detail: { file } }))
 
       if (!this.validation.isValid(file)) {
-        this.el.dispatchEvent(new CustomEvent(EVENT_VALIDATION_FAIL, {
-          detail: {
-            id: file.id,
-            error: this.validation.errors[0]
-          }
-        }))
+        file.error = this.validation.errors[0]
+        this.el.dispatchEvent(new CustomEvent(EVENT_VALIDATION_FAIL, { detail: { file } }))
         continue
       }
 
