@@ -28,6 +28,8 @@ const defaultConf = {
   /**
    * AlertComponent configuration
    */
+
+  // принимает селектор для вывода сообщений об ошибках
   alertComponentElement: null,
 
   /**
@@ -37,8 +39,15 @@ const defaultConf = {
   /**
    * CardComponent configuration
    */
+
+  // принимает селектор для вывода превьюшек
   cardComponentElement: null,
+
+  // устанавливает порядок добаления превьюшек
   cardReverseDirection: false,
+
+  // определяет правила добавления превьюшек, заменить или поставить в очередь
+  cardJoining: false,
 
   /**
    * ThumbService configuration
@@ -218,6 +227,10 @@ export class CardComponent {
     this._isDirectionReverse = !!value
   }
 
+  set joining (value) {
+    this._isJoining = !!value
+  }
+
   init () {
     let spot = this.el
 
@@ -242,12 +255,16 @@ export class CardComponent {
   onLoading (event) {
     this._file = event.detail.file
 
-    const tpl = HelperUtil.createHTML(`<div id="${this._file.id}" class="${CARD}__card"></div>`)
+    if (!this._isJoining) {
+      this._deck.innerHTML = this.template()
+    }
 
-    if (this._isDirectionReverse) {
-      this._deck.prepend(tpl)
-    } else {
-      this._deck.append(tpl)
+    if (this._isDirectionReverse && this._isJoining) {
+      this._deck.prepend(HelperUtil.createHTML(this.template()))
+    }
+
+    if (!this._isDirectionReverse && this._isJoining) {
+      this._deck.append(HelperUtil.createHTML(this.template()))
     }
 
     this.state = CARD_STATE_LOADING
@@ -267,6 +284,10 @@ export class CardComponent {
     if (CARD_STATE_SUCCESS === state) {
       this._card.innerHTML = `<img src="${this._file.dataURL}" class="${CARD}__card-img" alt="">`
     }
+  }
+
+  template () {
+    return `<div id="${this._file.id}" class="${CARD}__card"></div>`
   }
 }
 
@@ -453,6 +474,7 @@ export class App {
     this.card = new CardComponent({ el: this.el })
     this.card.element = this.conf.cardComponentElement
     this.card.directionReverse = this.conf.cardReverseDirection
+    this.card.joining = this.conf.cardJoining
     this.card.init()
 
     // инициализация сервиса превьюшек
