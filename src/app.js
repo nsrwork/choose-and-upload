@@ -28,6 +28,7 @@ const defaultConf = {
   /**
    * AlertComponent configuration
    */
+  alertComponentElement: null,
 
   /**
    * ButtonComponent configuration
@@ -36,6 +37,7 @@ const defaultConf = {
   /**
    * CardComponent configuration
    */
+  cardComponentElement: null,
 
   /**
    * ThumbService configuration
@@ -166,9 +168,19 @@ export class AlertComponent {
     this.el.addEventListener(EVENT_LOAD_FAIL, this)
   }
 
+  set element (element) {
+    this._element = document.querySelector(element)
+  }
+
   init () {
-    this.el.append(HelperUtil.createHTML(`<div class="${ALERT}__group"></div>`))
-    this._alerts = this.el.querySelector(`.${ALERT}__group`)
+    let spot = this.el
+
+    if (this._element) {
+      spot = this._element
+    }
+
+    spot.append(HelperUtil.createHTML(`<div class="${ALERT}__group"></div>`))
+    this._alerts = spot.querySelector(`.${ALERT}__group`)
   }
 
   handleEvent (event) {
@@ -197,9 +209,19 @@ export class CardComponent {
     this._file = null
   }
 
+  set element (element) {
+    this._element = document.querySelector(element)
+  }
+
   init () {
-    this.el.append(HelperUtil.createHTML(`<div class="${CARD}__deck"></div>`))
-    this._deck = this.el.querySelector(`.${CARD}__deck`)
+    let spot = this.el
+
+    if (this._element) {
+      spot = this._element
+    }
+
+    spot.append(HelperUtil.createHTML(`<div class="${CARD}__deck"></div>`))
+    this._deck = spot.querySelector(`.${CARD}__deck`)
   }
 
   onError (event) {
@@ -407,6 +429,7 @@ export class App {
 
     // инициализация блока сообщений
     this.alert = new AlertComponent({ el: this.el })
+    this.alert.element = this.conf.alertComponentElement
     this.alert.init()
 
     // отрисовываем кнопку
@@ -415,6 +438,7 @@ export class App {
 
     // инициализируем болванку
     this.card = new CardComponent({ el: this.el })
+    this.card.element = this.conf.cardComponentElement
     this.card.init()
 
     // инициализация сервиса превьюшек

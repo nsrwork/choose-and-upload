@@ -12,29 +12,29 @@
     margin: 20px
 }
 
-#ChooseAndUpload .choose-and-upload-alerts__group {
+.choose-and-upload-alerts__group {
     margin: 20px 0;
 }
 
-#ChooseAndUpload .choose-and-upload-alerts__alert {}
+.choose-and-upload-alerts__alert {}
 
-#ChooseAndUpload .choose-and-upload-button__group {
+.choose-and-upload-button__group {
     margin: 20px 0;
 }
 
-#ChooseAndUpload .choose-and-upload-button__button {
+.choose-and-upload-button__button {
     color: var(--button_text-color);
     background-color: var(--button_bg-color);
     border-color: var(--button_border-color);
 }
 
-#ChooseAndUpload .choose-and-upload-card__deck {
+.choose-and-upload-card__deck {
     display: flex;
     flex-wrap: wrap;
     margin: 20px 0;
 }
 
-#ChooseAndUpload .choose-and-upload-card__card {
+.choose-and-upload-card__card {
     height: var(--card_height);
     width: var(--card_width);
     display: flex;
@@ -46,12 +46,12 @@
     margin-right: 1rem;
 }
 
-#ChooseAndUpload .choose-and-upload-card__card span {
+.choose-and-upload-card__card span {
     font-size: 48px;
     color: var(--card_error-icon-color)
 }
 
-#ChooseAndUpload .choose-and-upload-card__card-img {
+.choose-and-upload-card__card-img {
     overflow: hidden;
     max-height: var(--card_height);
     max-width: var(--card_width);
