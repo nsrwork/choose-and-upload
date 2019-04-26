@@ -1,6 +1,6 @@
 {
   "name": "choose-and-send",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Photo Uploader",
   "main": "index.js",
   "directories": {
