@@ -38,6 +38,7 @@ const defaultConf = {
    * CardComponent configuration
    */
   cardComponentElement: null,
+  cardReverseDirection: false,
 
   /**
    * ThumbService configuration
@@ -213,6 +214,10 @@ export class CardComponent {
     this._element = document.querySelector(element)
   }
 
+  set directionReverse (value) {
+    this._isDirectionReverse = !!value
+  }
+
   init () {
     let spot = this.el
 
@@ -236,7 +241,15 @@ export class CardComponent {
 
   onLoading (event) {
     this._file = event.detail.file
-    this._deck.append(HelperUtil.createHTML(`<div id="${this._file.id}" class="${CARD}__card"></div>`))
+
+    const tpl = HelperUtil.createHTML(`<div id="${this._file.id}" class="${CARD}__card"></div>`)
+
+    if (this._isDirectionReverse) {
+      this._deck.prepend(tpl)
+    } else {
+      this._deck.append(tpl)
+    }
+
     this.state = CARD_STATE_LOADING
   }
 
@@ -439,6 +452,7 @@ export class App {
     // инициализируем болванку
     this.card = new CardComponent({ el: this.el })
     this.card.element = this.conf.cardComponentElement
+    this.card.directionReverse = this.conf.cardReverseDirection
     this.card.init()
 
     // инициализация сервиса превьюшек
