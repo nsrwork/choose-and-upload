@@ -244,15 +244,58 @@ export class ThumbService {
     this._file = null
   }
 
+  set height (pixelSize) {
+    this._height = pixelSize
+  }
+
+  set width (pixelSize) {
+    this._width = pixelSize
+  }
+
   onSuccess (event) {
     this._file = event.detail.file
     this.reader.readAsDataURL(this._file)
   }
 
   onLoad (event) {
-    // @todo resize and crop
-    this._file.dataURL = event.target.result
-    this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_COMPLETE, { detail: { file: this._file } }))
+    const image = new Image(this._width, this._height)
+
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+
+    image.onload = () => {
+
+      // определяем размер холста
+      canvas.width = image.width;
+      canvas.height = image.height;
+
+      // если ширина изображения равна высоте, а настройки превьюшек не равны
+      if (image.naturalHeight === image.naturalWidth && image.width > image.height) {
+        image.height = (image.width)
+      }
+
+      // если ширина изображения равна высоте, а настройки превьюшек не равны
+      if (image.naturalHeight === image.naturalWidth && image.width < image.height) {
+        image.width = (image.height)
+      }
+
+      // если высота изображения больше ширины
+      if (image.naturalHeight > image.naturalWidth) {
+        image.height = image.width * (image.naturalHeight / image.naturalWidth)
+      }
+
+      // если ширина изображения больше высоты
+      if (image.naturalWidth > image.naturalHeight) {
+        image.width = image.height * (image.naturalWidth / image.naturalHeight)
+      }
+
+      ctx.drawImage(image, 0, 0, image.width, image.height)
+
+      this._file.dataURL = canvas.toDataURL()
+      this.el.dispatchEvent(new CustomEvent(EVENT_LOAD_COMPLETE, { detail: { file: this._file } }))
+    }
+
+    image.src = event.target.result
   }
 }
 
