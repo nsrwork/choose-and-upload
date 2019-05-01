@@ -29,7 +29,7 @@ const defaultConf = {
    * AlertComponent configuration
    */
 
-  // устанавливает селектор в который будут выводиться сообщений об ошибках
+  // устанавливает селектор в который будут выводиться сообщения об ошибках
   alertComponentElement: null,
 
   /**
@@ -47,7 +47,7 @@ const defaultConf = {
   cardReverseDirection: false,
 
   // устанавливает правила добавления превьюшек, заменить или поставить в очередь
-  cardJoining: false,
+  cardJoining: true,
 
   /**
    * ThumbService configuration
@@ -380,7 +380,7 @@ export class ValidationService {
     this._errors = []
 
     if (!file instanceof File) {
-      throw new TypeError('Не корректный тип.')
+      throw new TypeError('Не корректный тип объекта.')
     }
 
     if (this._limit <= 0) {
@@ -453,7 +453,7 @@ export class App {
   constructor ({ el, conf = {} }) {
 
     if (null === document.querySelector(el)) {
-      throw new Error('Не найден элемент для инициализации ChooseAndUpload')
+      throw new Error('Не найден элемент для инициализации ChooseAndUpload.')
     }
 
     this.el = el
