@@ -449,7 +449,7 @@ export class HttpService {
   }
 }
 
-export class ChooseAndUpload {
+class ChooseAndUpload {
   constructor ({ el, conf = {} }) {
 
     if (null === document.querySelector(el)) {
@@ -534,3 +534,5 @@ export class ChooseAndUpload {
     }
   }
 }
+
+module.exports = ChooseAndUpload
