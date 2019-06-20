@@ -8,7 +8,7 @@
 ```
 
 ```js
-import { ChooseAndUpload } from './src/app.js'
+import ChooseAndUpload from './src/app'
 
 new ChooseAndUpload({
     el: '#ChooseAndUpload',
