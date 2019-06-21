@@ -18,6 +18,7 @@ const EVENT_VALIDATION_FAIL = EVENT + '-validation-fail'
 const EVENT_LOAD_FAIL = EVENT + '-load-fail'
 const EVENT_LOAD_SUCCESS = EVENT + '-load-success'
 const EVENT_LOAD_COMPLETE = EVENT + '-load-complete'
+const EVENT_SEND = EVENT + '-send'
 
 const defaultConf = {
 
@@ -66,8 +67,7 @@ const defaultConf = {
    * HttpService configuration
    */
   methodRequest: 'POST',
-  endPoint: window.location.href,
-  headers: {}
+  endPoint: window.location.href
 }
 
 export class HelperUtil {
@@ -294,10 +294,13 @@ export class CardComponent {
 export class ThumbService {
   constructor ({ el }) {
     this.el = el
-    this.reader = new FileReader()
-    this.reader.addEventListener('load', this.onLoad.bind(this))
-    this.el.addEventListener(EVENT_LOAD_SUCCESS, this.onSuccess.bind(this))
     this._file = null
+    this.reader = new FileReader()
+    this.el.addEventListener(EVENT_LOAD_SUCCESS, this.onSuccess.bind(this))
+    this.reader.addEventListener('load', this.onLoad.bind(this))
+
+    // дожидаемся отрисовки и отправляем следующий файл
+    this.reader.addEventListener('loadend', () => this.el.dispatchEvent(new Event(EVENT_SEND)))
   }
 
   set height (pixelSize) {
@@ -315,7 +318,6 @@ export class ThumbService {
 
   onLoad (event) {
     const image = new Image(this._width, this._height)
-
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
 
@@ -420,12 +422,6 @@ export class HttpService {
     this._method = method.toUpperCase()
   }
 
-  set headers (headers) {
-    this._headers = Object.assign(headers, {
-      'Content-Type': 'application/json;charset=utf-8;multipart/form-file',
-    })
-  }
-
   send (file) {
     this.doRequest(file).then((response) => {
       file.response = response
@@ -441,10 +437,11 @@ export class HttpService {
   }
 
   async doRequest (file) {
+    const data = new FormData();
+    data.append('file', file)
     return await fetch(this._url, {
       method: this._method,
-      headers: this._headers,
-      body: JSON.stringify(file)
+      body: data
     })
   }
 }
@@ -498,10 +495,12 @@ export default class ChooseAndUpload {
     this.http = new HttpService({ el: this.el })
     this.http.endpoint = this.conf.endPoint
     this.http.method = this.conf.methodRequest
-    this.http.headers = this.conf.headers
+
+    this.collectionIterator = null
 
     this.el.addEventListener('click', this.onClick.bind(this))
     this.el.addEventListener('change', this.onChange.bind(this))
+    this.el.addEventListener(EVENT_SEND, this.onSend.bind(this))
   }
 
   onClick (event) {
@@ -518,7 +517,7 @@ export default class ChooseAndUpload {
 
     const collection = new Set(event.target.files)
 
-    for (let file of collection.values()) {
+    for (const file of collection.values()) {
 
       file.id = HelperUtil.getUniqId()
 
@@ -529,8 +528,13 @@ export default class ChooseAndUpload {
         this.el.dispatchEvent(new CustomEvent(EVENT_VALIDATION_FAIL, { detail: { file } }))
         continue
       }
-
-      this.http.send(file)
     }
+
+    this.collectionIterator = collection[Symbol.iterator]()
+    this.el.dispatchEvent(new Event(EVENT_SEND))
+  }
+
+  onSend () {
+    this.http.send(this.collectionIterator.next().value)
   }
 }
