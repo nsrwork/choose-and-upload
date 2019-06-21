@@ -531,11 +531,16 @@ export default class ChooseAndUpload {
       }
     }
 
-    this.collectionIterator = collection[Symbol.iterator]()
-    this.el.dispatchEvent(new Event(EVENT_SEND))
+    if (collection.size > 0) {
+      this.collectionIterator = collection[Symbol.iterator]()
+      this.el.dispatchEvent(new Event(EVENT_SEND))
+    }
   }
 
   onSend () {
-    this.http.send(this.collectionIterator.next().value)
+    const file = this.collectionIterator.next().value
+    if (file) {
+      this.http.send(file)
+    }
   }
 }
