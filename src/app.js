@@ -526,6 +526,7 @@ export default class ChooseAndUpload {
       if (!this.validation.isValid(file)) {
         file.error = this.validation.errors[0]
         this.el.dispatchEvent(new CustomEvent(EVENT_VALIDATION_FAIL, { detail: { file } }))
+        collection.delete(file)
         continue
       }
     }
